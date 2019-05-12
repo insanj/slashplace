@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.lang.Math;
 import java.io.File;
+import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -27,10 +28,8 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.FluidCollisionMode;
 
-import net.minecraft.server.v1_13_R2.EnumBlockRotation;
-import net.minecraft.server.v1_13_R2.DefinedStructure;
-
-import com.insanj.slashplace.schematic.SlashPlaceSchematic
+import com.insanj.slashplace.schematic.SlashPlaceSchematic;
+import com.insanj.slashplace.schematic.SlashPlaceSchematicPlace;
 import com.insanj.slashplace.schematic.SlashPlaceSchematicHandler;
 
 class SlashPlaceCommandExecutor implements CommandExecutor {
@@ -52,7 +51,7 @@ class SlashPlaceCommandExecutor implements CommandExecutor {
     String cmdName = command.getName();
     if (hasPermission(sender, cmdName) == false) {
         sender.sendMessage(ChatColor.RED + "Sorry! You do not have permission to use this slashplace command.");
-        return false;
+        return true;
     }
 
     Player player = (Player) sender;
@@ -72,37 +71,91 @@ class SlashPlaceCommandExecutor implements CommandExecutor {
   }
 
   public boolean onPlaceCommand(Player player, String arg) {
-    SlashPlaceSchematicPlace place = plugin.places.get(player.getUUID());
+    UUID playerUUID = player.getUniqueId();
+    HashMap<String, SlashPlaceSchematicPlace> playerPlaces = plugin.places.get(playerUUID);
+    if (playerPlaces == null) {
+      player.sendMessage(ChatColor.RED + "<slashplace> You must set a location with /placeloc before using /place!");
+      return true;
+    }
+
+    SlashPlaceSchematicPlace place = playerPlaces.get(arg);
     if (place == null) {
-      sender.sendMessage(ChatColor.RED + "You must set a location with /placeloc before using /place!");
-      return false;
+      player.sendMessage(ChatColor.RED + "<slashplace> You must set a location with /placeloc before using /place!");
+      return true;
     }
 
     Location target = place.location; // player.getLocation();
-    sender.sendMessage(ChatColor.BLUE + "Generating " + arg + "...");
+    SlashPlaceSchematic schematic = place.schematic;
 
-    if (schematics == null || schematics.size() <= 0) {
-        sender.sendMessage(ChatColor.RED + "No schematics found in /plugins/slashplace/");
-        return false;
-    }
+    player.sendMessage(ChatColor.BLUE + "<slashplace> Placing " + arg + "...");
 
-    String schematicName = argumentString;
-    SlashPlaceSchematic schematic = schematics.get(schematicName);
-    if (schematic == null) {
-        sender.sendMessage(ChatColor.RED + "Could not find schematic with name: " + schematicName);
-        return false;
-    }
+    place.invertedSchematic = plugin.handler.pasteSchematic(target.getWorld(), target, schematic);
+    playerPlaces.put(arg, place);
+    plugin.places.put(playerUUID, playerPlaces);
 
-    handler.pasteSchematic(player.getWorld(), target, schematic);
-    sender.sendMessage(ChatColor.GREEN + String.format("Done building schematic!"));
+    player.sendMessage(ChatColor.GREEN + "<slashplace> Done placing schematic!");
+
     return true;
   }
 
   public boolean onPlaceLocCommand(Player player, String arg) {
+    if (plugin.schematics == null) {
+      player.sendMessage(ChatColor.RED + "<slashplace> No schematics found in /plugins/slashplace/");
+      return true;
+    }
 
+    SlashPlaceSchematic schematic = plugin.schematics.get(arg);
+    if (schematic == null) {
+      player.sendMessage(ChatColor.RED + "<slashplace> No schematic found with the name: " + arg);
+      return true;
+    }
+
+    UUID playerUUID = player.getUniqueId();
+    Location location = player.getLocation();
+    SlashPlaceSchematicPlace place = new SlashPlaceSchematicPlace(schematic, location, playerUUID);
+
+    HashMap<String, SlashPlaceSchematicPlace> playerPlaces = plugin.places.get(playerUUID);
+    if (playerPlaces == null) {
+      playerPlaces = new HashMap<String, SlashPlaceSchematicPlace>();
+    }
+
+    playerPlaces.put(arg, place);
+    plugin.places.put(playerUUID, playerPlaces);
+    player.sendMessage(ChatColor.GREEN + String.format("<slashplace> Saved your location, ready to place %s!", arg));
+    return true;
   }
 
   public boolean onPlaceUndoCommand(Player player, String arg) {
+ if (plugin.schematics == null) {
+      player.sendMessage(ChatColor.RED + "<slashplace> No schematics found in /plugins/slashplace/");
+      return true;
+    }
 
+    SlashPlaceSchematic schematic = plugin.schematics.get(arg);
+    if (schematic == null) {
+      player.sendMessage(ChatColor.RED + "<slashplace> No schematic found with the name: " + arg);
+      return true;
+    }
+
+    HashMap<String, SlashPlaceSchematicPlace> playerPlaces = plugin.places.get(player.getUniqueId());
+    if (playerPlaces == null) {
+      player.sendMessage(ChatColor.RED + "<slashplace> Could not find any previously built schematics for your player UUID");
+      return true;
+    }
+
+    SlashPlaceSchematicPlace place = playerPlaces.get(arg);
+    if (place == null) {
+      player.sendMessage(ChatColor.RED + "<slashplace> Could not find any place where you previously built this schematic :(");
+      return true;
+    }
+
+    if (place.invertedSchematic == null) {
+      player.sendMessage(ChatColor.RED + "<slashplace> Found that you ran /placeloc for this schematic, but never ran /place... We cannot undo what wasn't once done?");
+      return true;
+    }
+
+    player.sendMessage(ChatColor.GREEN + String.format("<slashplace> Removed placed blocks from schematic %s!", arg));
+    plugin.handler.pasteSchematic(place.location.getWorld(), place.location, place.invertedSchematic);
+    return true;
   }
 }

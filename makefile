@@ -7,7 +7,6 @@ OUTPUT_NAME=slashplace
 SOURCE_PATH=plugin/java
 BUILD_PATH=build
 EXTERNAL_PATH=external
-SPIGOT_JAR_FILENAME=spigot-1.13.2.jar
 CRAFTBUKKIT_JAR_FILENAME=craftbukkit-1.13.2.jar
 JAR_DEPS_PATH=$(EXTERNAL_PATH)/$(CRAFTBUKKIT_JAR_FILENAME)
 GIT_TAG:=$(shell git describe --tags)

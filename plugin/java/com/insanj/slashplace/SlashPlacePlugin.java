@@ -48,7 +48,7 @@ public class SlashPlacePlugin extends JavaPlugin {
       config = new SlashPlaceConfig(this);
 
       // load schematics into memory (held in the plugin class as a central source of data)
-      schematics = readSchematics();
+      schematics = config.readSchematics();
       getLogger().info("-> finished reading .schematics! " + schematics.toString());
 
       // prepare helper classes; these will be used by the command executor to construct the schematics
@@ -62,22 +62,7 @@ public class SlashPlacePlugin extends JavaPlugin {
       getCommand("placeundo").setExecutor(executor); // /placeundo
     }
 
-    private HashMap<String, SlashPlaceSchematic> readSchematics() {
-      ArrayList<File> schematicFiles = config.getSchematicFiles();
-
-      // loop thru and parse each NBT/.schematic file
-      final String schematicFolderPath = SlashPlaceConfig.getSchematicsFolderPath(this);
-      HashMap<String, SlashPlaceSchematic> readSchematics = new HashMap<String, SlashPlaceSchematic>();
-      for (File file : schematicFiles) {
-          String fileName = file.getName();
-          SlashPlaceSchematic readFile = handler.readSchematicFile(fileName, file);
-          readSchematics.put(fileName, readFile);
-      }
-
-      return readSchematics;
-    }
-
-    public void logError(Throwable e) {
+    public void warning(Throwable e) {
       getLogger().warning(String.format("[%s] %s", "slashplace", ExceptionUtils.getStackTrace(e)));
     }
 }

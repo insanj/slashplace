@@ -20,6 +20,8 @@ import org.bukkit.Location;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 
+import com.insanj.slashplace.schematic.SlashPlaceSchematic;
+
 public class SlashPlaceConfig {
     private final SlashPlacePlugin plugin;
 
@@ -27,12 +29,12 @@ public class SlashPlaceConfig {
         this.plugin = plugin;
     }
 
-    public static String getSchematicsFolderPath(SlashPlacePlugin plugin) {
-        return plugin.getDataFolder();
+    private String getSchematicsFolderPath() {
+        return plugin.getDataFolder().toString();
     }
 
-    public ArrayList<File> getSchematicFiles() {
-        String pluginDataFolderPath = SlashPlaceConfig.getSchematicsFolderPath(plugin);
+    private ArrayList<File> getSchematicFiles() {
+        String pluginDataFolderPath = getSchematicsFolderPath();
         File pluginDataFolder = new File(pluginDataFolderPath);
         if (!pluginDataFolder.exists()) {
             pluginDataFolder.mkdir();
@@ -48,7 +50,7 @@ public class SlashPlaceConfig {
         return schematicFiles;
     }
 
-    public File readFile(String folderPath, String name) {
+    private File readFile(String folderPath, String name) {
         if (!name.endsWith(".schematic")) {
             name = name + ".schematic";
         }
@@ -60,5 +62,19 @@ public class SlashPlaceConfig {
         }
 
         return file;
+    }
+
+    public HashMap<String, SlashPlaceSchematic> readSchematics() {
+      ArrayList<File> schematicFiles = getSchematicFiles();
+
+      // loop thru and parse each NBT/.schematic file
+      HashMap<String, SlashPlaceSchematic> readSchematics = new HashMap<String, SlashPlaceSchematic>();
+      for (File file : schematicFiles) {
+          String fileName = file.getName();
+          SlashPlaceSchematic readFile = plugin.handler.readSchematicFile(fileName, file);
+          readSchematics.put(fileName, readFile);
+      }
+
+      return readSchematics;
     }
 }

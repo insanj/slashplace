@@ -25,6 +25,8 @@ import org.apache.commons.io.FilenameUtils;
 import net.minecraft.server.v1_13_R2.NBTTagCompound;
 import net.minecraft.server.v1_13_R2.NBTCompressedStreamTools;
 
+import com.insanj.slashplace.SlashPlacePlugin;
+
 public class SlashPlaceSchematicHandler {
     public final SlashPlacePlugin plugin;
 
@@ -68,13 +70,13 @@ public class SlashPlaceSchematicHandler {
             String prettyName = FilenameUtils.getBaseName(name);
             return new SlashPlaceSchematic(prettyName, sblocks, data, width, length, height);
         } catch (Exception e) {
-            plugin.logError(e);
+            plugin.warning(e);
         }
 
         return null;
     }
 
-    public void pasteSchematic(World world, Location loc, SlashPlaceSchematic schematic) {
+    public SlashPlaceSchematic pasteSchematic(World world, Location loc, SlashPlaceSchematic schematic) {
         short[] blocks = schematic.blocks;
         byte[] blockData = schematic.data;
 
@@ -98,7 +100,7 @@ public class SlashPlaceSchematicHandler {
                     Material material = convertMaterial(b, blockData[index]);
                     if (material == null) {
                       // incompatible material!!
-                      plugin.logError(new Exception("Unable to convert Material bytes from schematic file! Block integer: " + Integer.toString(b)));
+                      plugin.warning(new Exception("Unable to convert Material bytes from schematic file! Block integer: " + Integer.toString(b)));
                       continue;
                     }
 
@@ -115,6 +117,8 @@ public class SlashPlaceSchematicHandler {
                 }
             }
         }
+
+        return schematic;
     }
 
     public Material convertMaterial(int legacyMaterialId, byte legacyDataByte) {
