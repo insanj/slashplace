@@ -1,0 +1,34 @@
+name: slashplace
+author: insanj
+description: /place schematics
+website: https://github.com/insanj/slashplace
+prefix: slashplace
+version: 0.1.0
+main: com.insanj.slashplace.SlashPlacePlugin
+api-version: 1.13
+commands:
+  place:
+    permission: slashplace.place
+    description: Place a schematic
+    usage: |
+      /place <schematic_name>
+  placeloc:
+    permission: slashplace.placeloc
+    description: Set location to place a schematic
+    usage: |
+      /placeloc <schematic_name>
+  placeundo:
+    permission: slashplace.placeundo
+    description: Undo last place of schematic with name
+    usage: |
+      /placeundo <schematic_name>
+permissions:
+  slashplace.place:
+    description: Use the /place command
+    default: op
+  slashplace.placeloc:
+    description: Use the /placeloc command
+    default: op
+  slashplace.placeundo:
+    description: Use the /placeundo command
+    default: op
