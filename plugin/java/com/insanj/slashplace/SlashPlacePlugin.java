@@ -47,16 +47,16 @@ public class SlashPlacePlugin extends JavaPlugin {
       // setup config, which is used to read schematics from disk
       config = new SlashPlaceConfig(this);
 
+      // prepare helper classes; these will be used by the command executor to construct the schematics
+      handler = new SlashPlaceSchematicHandler(this);
+      executor = new SlashPlaceCommandExecutor(this);
+      places = new HashMap<UUID, HashMap<String, SlashPlaceSchematicPlace>>();
+
       // load schematics into memory (held in the plugin class as a central source of data)
       schematics = config.readSchematics();
       getLogger().info("-> finished reading .schematics! " + schematics.toString());
 
-      // prepare helper classes; these will be used by the command executor to construct the schematics
-      places = new HashMap<UUID, HashMap<String, SlashPlaceSchematicPlace>>();
-      handler = new SlashPlaceSchematicHandler(this);
-
       // register commands which will allow for everything to be used!
-      executor = new SlashPlaceCommandExecutor(this);
       getCommand("place").setExecutor(executor); // /place
       getCommand("placeloc").setExecutor(executor); // /placeloc
       getCommand("placeundo").setExecutor(executor); // /placeundo

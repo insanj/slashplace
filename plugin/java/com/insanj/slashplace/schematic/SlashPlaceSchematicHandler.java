@@ -3,7 +3,7 @@ package com.insanj.slashplace.schematic;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
-
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
@@ -77,14 +77,13 @@ public class SlashPlaceSchematicHandler {
     }
 
     public SlashPlaceSchematic pasteSchematic(World world, Location loc, SlashPlaceSchematic schematic) {
+        SlashPlaceSchematic inverted = SlashPlaceSchematic.copy(schematic);
         short[] blocks = schematic.blocks;
         byte[] blockData = schematic.data;
 
         short length = schematic.length;
         short width = schematic.width;
         short height = schematic.height;
-
-        int delay = 0;
 
         for (int x = 0; x < width; ++x) {
             for (int y = 0; y < height; ++y) {
@@ -104,21 +103,29 @@ public class SlashPlaceSchematicHandler {
                       continue;
                     }
 
-                    Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(plugin, new Runnable() {
-                      public void run() {
+                    BlockState existing = block.getState();
+                    short invertedB = (short)existing.getType().getId();
+                    inverted.blocks[index] = invertedB;
+
+                    byte invertedBlockData = existing.getRawData();
+                    inverted.data[index] = invertedBlockData;
+
+
+                    //Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(plugin, new Runnable() {
+                   //   public void run() {
                         block.setType(material);
    
                         BlockState bs = block.getState();
                         bs.setRawData(blockData[index]);
                         bs.update(true);
-                      }
-                    }, delay++);
+                      //}
+                    //}, 0L);
 
                 }
             }
         }
 
-        return schematic;
+        return inverted;
     }
 
     public Material convertMaterial(int legacyMaterialId, byte legacyDataByte) {

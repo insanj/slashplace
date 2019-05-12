@@ -1,5 +1,7 @@
 package com.insanj.slashplace.schematic;
 
+import java.util.Arrays;
+
 public class SlashPlaceSchematic {
    public final String name;
    public final short[] blocks;
@@ -15,6 +17,10 @@ public class SlashPlaceSchematic {
         this.width = width;
         this.length = length;
         this.height = height;
+    }
+
+    public static SlashPlaceSchematic copy(SlashPlaceSchematic schematic) {
+        return new SlashPlaceSchematic(new String(schematic.name), Arrays.copyOf(schematic.blocks, schematic.blocks.length), Arrays.copyOf(schematic.data, schematic.data.length), schematic.width, schematic.length, schematic.height);
     }
 
     @Override
