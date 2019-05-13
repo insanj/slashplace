@@ -54,7 +54,7 @@ public class SlashPlacePlugin extends JavaPlugin {
 
       // load schematics into memory (held in the plugin class as a central source of data)
       schematics = config.readSchematics();
-      getLogger().info("-> finished reading .schematics! " + schematics.toString());
+      getLogger().info("-> finished reading /plugin/slashplace/ folder! " + schematics.toString());
 
       // register commands which will allow for everything to be used!
       getCommand("place").setExecutor(executor); // /place

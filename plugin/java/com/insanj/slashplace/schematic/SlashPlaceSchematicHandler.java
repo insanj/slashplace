@@ -67,8 +67,8 @@ public class SlashPlaceSchematicHandler {
 
             stream.close();
 
-            String prettyName = FilenameUtils.getBaseName(name);
-            return new SlashPlaceSchematic(prettyName, sblocks, data, width, length, height);
+            // String prettyName = FilenameUtils.getBaseName(name);
+            return new SlashPlaceSchematic(name, sblocks, data, width, length, height);
         } catch (Exception e) {
             plugin.warning(e);
         }
